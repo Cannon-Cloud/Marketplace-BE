@@ -45,6 +45,9 @@ export const login = async (req, res) => {
           email: user.email,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
+          stripe_account_id: user.stripe_account_id,
+          striple_seller: user.striple_seller,
+          stripeSession: user.stripeSession,
         },
       });
     });
