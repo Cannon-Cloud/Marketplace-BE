@@ -1,7 +1,8 @@
 import User from "../models/user";
 import Stripe from "stripe";
 import queryString from "query-string";
-import hotel from "../models/hotel";
+import Hotel from "../models/hotel";
+import Order from "../models/order";
 
 const stripe = Stripe(process.env.STRIPE_SECRET);
 
@@ -103,7 +104,7 @@ export const payoutSetting = async (req, res) => {
 export const stripeSessionId = async (req, res) => {
   const { hotelId } = req.body; //get hotel id
 
-  const item = await hotel.findById(hotelId).populate("postedBy").exec(); //find hotel
+  const item = await Hotel.findById(hotelId).populate("postedBy").exec(); //find hotel
 
   const fee = (item.price * 20) / 100;
 
@@ -123,7 +124,7 @@ export const stripeSessionId = async (req, res) => {
         destination: item.postedBy.stripe_account_id,
       },
     },
-    success_url: process.env.STRIPE_SUCCESS_URL,
+    success_url: `${process.env.STRIPE_SUCCESS_URL}/${item._id}`,
     cancel_url: process.env.STRIPE_CANCEL_URL,
   });
 
@@ -132,4 +133,39 @@ export const stripeSessionId = async (req, res) => {
   res.send({
     sessionId: session.id,
   });
+};
+
+export const stripeSuccess = async (req, res) => {
+  try {
+    //
+    const { hotelId } = req.body;
+    const user = await User.findById(req.user._id).exec();
+
+    if (!user.stripeSession.id) {
+      return;
+    }
+    const session = await stripe.checkout.sessions.retrieve(
+      user.stripeSession.id
+    );
+    if (session.payment_status === "paid") {
+      const orderExist = await Order.findOne({
+        "session.id": session.id,
+      }).exec();
+      if (orderExist) {
+        res.json({ success: true });
+      } else {
+        let newOrder = await new Order({
+          hotel: hotelId,
+          session,
+          orderedBy: user._id,
+        }).save();
+        await User.findByIdAndUpdate(user._id, {
+          $set: { stripeSession: {} },
+        });
+        res.json({ success: true });
+      }
+    }
+  } catch (err) {
+    console.log("stripe success error: ", err);
+  }
 };
