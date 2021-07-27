@@ -15,7 +15,7 @@ mongoose
     useUnifiedTopology: true,
     useCreateIndex: true,
   })
-  .then(() => console.log("DB Connected"))
+  .then(() => console.log("DATABASE Connected"))
   .catch((err) => console.log("DB Connection Error: ", err));
 
 // middlewares
