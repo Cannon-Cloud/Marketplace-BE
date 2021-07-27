@@ -57,3 +57,10 @@ export const sellerHotels = async (req, res) => {
 
   res.send(all);
 };
+
+export const remove = async (req, res) => {
+  let removed = await Hotel.findByIdAndDelete(req.params.hotelId)
+    .select("-image.data")
+    .exec();
+  res.json(removed); // update to display hotel name
+};
