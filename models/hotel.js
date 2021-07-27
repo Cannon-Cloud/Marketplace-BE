@@ -7,19 +7,19 @@ const hotelSchema = new Schema(
   {
     title: {
       type: String,
-      required: "Title is requred",
+      required: "Title is required",
     },
     content: {
       type: String,
-      required: "content is requred",
+      required: "Content is required",
       maxlength: 10000,
     },
     location: {
       type: String,
     },
     price: {
-      type: String,
-      required: "Price is requred",
+      type: Number,
+      required: "Price is required",
       trim: true,
     },
     postedBy: {
@@ -28,7 +28,7 @@ const hotelSchema = new Schema(
     },
     image: {
       data: Buffer,
-      constentType: "String",
+      contentType: String,
     },
     from: {
       type: Date,
@@ -40,7 +40,7 @@ const hotelSchema = new Schema(
       type: Number,
     },
   },
-  { timestampes: true }
+  { timestamps: true }
 );
 
 export default mongoose.model("Hotel", hotelSchema);
